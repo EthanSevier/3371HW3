@@ -1,4 +1,4 @@
- function callDateTime() {
+function callDateTime() {
     var currentDate = (new Date()).toDateString();
     var currentTime = (new Date()).toLocaleTimeString();
     document.getElementById('date').innerHTML = `${currentDate} - ${currentTime}`;
@@ -24,15 +24,15 @@ function openModal() {
 
 }
 
+var dateTracker=0;
+function dateInputted(){
+  dateTracker = 1;
+  validateDob();
+}
 
 function displayReviewInfo(){
   let fname = document.getElementById('fname').value; 
   let lname = document.getElementById('lname').value; 
-  let mint = document.getElementById('mint').value; 
-  let dob = document.getElementById('dob').value; 
-  let ssn = document.getElementById('ssn').value; 
-  let phone = document.getElementById('Phone').value; 
-  let email = document.getElementById('Email').value; 
   let optin;
   if (document.getElementById('optYes').checked) {
     optin = "Yes";
@@ -41,15 +41,11 @@ function displayReviewInfo(){
   }
   let add1 = document.getElementById('addLine1').value; 
   let add2 = document.getElementById('addLine2').value; 
-  let city = document.getElementById('City').value; 
-  let state = document.getElementById('State').value; 
-  let zip = document.getElementById('Zip').value; 
   let painLevel = document.getElementById('painLevel').value; 
   let payment;
   if (document.getElementById('payOut').checked) {
    payment = "Out of pocket";
   } else if (document.getElementById('payIns').checked) {
-   payment = "Insurance";
   }
   let sex;
   if (document.getElementById('sexMale').checked) {
@@ -81,37 +77,42 @@ else {
   document.getElementById('lnameR').style.color = "green"
 }
 
+validateDob();
 
-    document.getElementById('mintR').innerText = "Middle Int: "+ mint;
+validateSSN();
 
-    document.getElementById('dobR').innerText = "Date of Birth: "+ dob;
+validatePhone();
 
-    document.getElementById('ssnR').innerText = "SSN: "+ ssn;
+validateEmail();
 
-    document.getElementById('PhoneR').innerText = "Phone: "+ phone;
 
-if (!validateEmail()) {
-  document.getElementById('EmailR').innerText = "Email: Invalid";
-  document.getElementById('EmailR').style.color = "red"
+
+if (optin == "Yes" || optin == "No"){
+    document.getElementById('OptinR').innerText = "Opt-In for texts: "+ optin;
+    document.getElementById('OptinR').style.color = "green"
 } 
 else {
-  document.getElementById('EmailR').innerText = "Email: " + email;
-  document.getElementById('EmailR').style.color = "green"
+  document.getElementById('OptinR').innerText = "Opt-In for texts: Missing";
+  document.getElementById('OptinR').style.color = "red"
 }
 
-    document.getElementById('OptinR').innerText = "Opt-In for texts: "+ optin;
+validateAdd1();
 
-    document.getElementById('addLine1R').innerText = "Address Line 1: "+ add1;
+  document.getElementById('addLine2R').innerText = "Address Line 2: "+ add2;
+if(add1.length > 0 && /[a-zA-Z0-9]/.test(add1)){
+  document.getElementById('addLine2R').style.color = "green"
+}
 
-    document.getElementById('addLine2R').innerText = "Address Line 2: "+ add2;
+validateCity();
 
-    document.getElementById('CityR').innerText = "City: "+ city;
+validateState();
+  
 
-    document.getElementById('StateR').innerText = "State: "+ state;
+validateZip();
 
-    document.getElementById('ZipR').innerText = "Zip: "+ zip;
 
-    document.getElementById('painLevelR').innerText = "Pain Level: "+ painLevel;
+  document.getElementById('painLevelR').innerText = "Pain Level: "+ painLevel;
+  document.getElementById('painLevelR').style.color = "green"
 
 if (!validateUserID()) {
   document.getElementById('userIDR').innerText = "UserID: Invalid";
@@ -123,9 +124,24 @@ else {
 }
 
 
+if (sex != null){
     document.getElementById('sexR').innerText = "Sex: "+ sex;
+    document.getElementById('sexR').style.color = "green"
+} 
+else {
+  document.getElementById('sexR').innerText = "Sex: Missing";
+  document.getElementById('sexR').style.color = "red"
+}
 
-    document.getElementById('paymentR').innerText = "Payment Method: "+ payment;
+if (payment != null){
+    document.getElementById('paymentR').innerText = "Payment: "+ payment;
+    document.getElementById('paymentR').style.color = "green"
+} 
+else {
+  document.getElementById('paymentR').innerText = "Payment: Missing";
+  document.getElementById('paymentR').style.color = "red"
+}
+
 if (!validatePassword()) {
   document.getElementById('passwordR').innerText = "Password: Invalid";
   document.getElementById('passwordR').style.color = "red"
@@ -220,34 +236,176 @@ function closeModal() {
   function validateEmail(){
     const emailV = document.getElementById('Email').value;
     if(!emailCode.test(emailV)){
+      document.getElementById('EmailR').innerText = "Email: Invalid";
+      document.getElementById('EmailR').style.color = "red";
       document.getElementById('EmailError').innerText = "Please fill out email in the format name@domain.tld";
       return false;
     }
     else{
+      document.getElementById('EmailR').innerText = "Email: "+ emailV;
+      document.getElementById('EmailR').style.color = "green";
       document.getElementById('EmailError').innerText = " ";
       return true;
     }
   } 
 
- function verifySubmit(){
-  let fnameV1 = validateName('fname');
-  let lnameV1 = validateName('lname');
-  let emailV1 = validateEmail();
-  let userIDV1 = validateUserID();
-  let pwrdV1 = validatePassword();
-  let repwrdV1 = validateRepassword();
 
-  if (fnameV1 && lnameV1 && emailV1 && userIDV1 && pwrdV1 && repwrdV1) {
+function validateMint(){
+let mint = document.getElementById('mint').value; 
+  if(mint == ""){
+    document.getElementById('mintR').innerText = "Middle Int: ";
+    return true;
+}
+else if (/^[a-zA-Z]$/.test(mint)){    
+    document.getElementById('mintR').innerText = "Middle Int: "+ mint;
+    document.getElementById('mintR').style.color = "green";
+    document.getElementById('mintError').innerText = " ";
+    return true;
+}
+else{
+  document.getElementById('mintR').innerText = "Middle Int: Invalid";
+  document.getElementById('mintR').style.color = "red";
+  document.getElementById('mintError').innerText = "Middle Int should only be 1 letter";
+}
+ } 
+
+function validateDob(){
+  let dob = document.getElementById('dob').value;
+  if(dateTracker > 0){
+    document.getElementById('dobR').innerText = "Date of Birth: "+ dob;
+    document.getElementById('dobR').style.color = "green"
+    document.getElementById('dobError').innerText = " ";
+    return true;
+}
+else{
+  document.getElementById('dobR').innerText = "Date of Birth: Missing";
+  document.getElementById('dobR').style.color = "red"
+  document.getElementById('dobError').innerText = "Missing";
+}
+}
+
+function validateSSN(){
+  let ssn = document.getElementById('ssn').value; 
+if(ssn.length == 11){
+    document.getElementById('ssnR').innerText = "SSN: "+ ssn;
+    document.getElementById('ssnR').style.color = "green"
+    document.getElementById('ssnError').innerText = " ";
+    return true;
+}
+else if(ssn.length == 0){
+  document.getElementById('ssnR').innerText = "SSN: Missing";
+  document.getElementById('ssnR').style.color = "red"
+  document.getElementById('ssnError').innerText = "Missing";
+}
+else{
+  document.getElementById('ssnR').innerText = "SSN: Invalid";
+  document.getElementById('ssnR').style.color = "red"
+  document.getElementById('ssnError').innerText = "Invalid";
+}
+
+}
+
+function validatePhone() {
+  let phone = document.getElementById('Phone').value; 
+  if(phone.length == 12){
+    document.getElementById('PhoneR').innerText = "Phone: "+ phone;
+    document.getElementById('PhoneR').style.color = "green"
+    document.getElementById('phoneError').innerText = " ";
+    return true;
+}
+else if(phone.length == 0){
+  document.getElementById('PhoneR').innerText = "Phone: Missing";
+  document.getElementById('PhoneR').style.color = "red"
+  document.getElementById('phoneError').innerText = "Missing";
+}
+else{
+  document.getElementById('PhoneR').innerText = "Phone: Invalid";
+  document.getElementById('PhoneR').style.color = "red"
+  document.getElementById('phoneError').innerText = "Invalid";
+}
+
+}
+
+function validateAdd1() {
+let add1 = document.getElementById('addLine1').value;
+if(add1.length > 0 && /[a-zA-Z0-9]/.test(add1)){
+    document.getElementById('addLine1R').innerText = "Address Line 1: "+ add1;
+    document.getElementById('addLine1R').style.color = "green"
+    document.getElementById('addLine1Error').innerText = " ";
+    return true;
+
+}
+else{
+    document.getElementById('addLine1R').innerText = "Missing";
+    document.getElementById('addLine1R').style.color = "red"
+    document.getElementById('addLine1Error').innerText = "Missing";
+}
+
+}
+
+function validateCity(){
+let city = document.getElementById('City').value; 
+ if(city.length > 0 && /[a-zA-Z0-9]/.test(city)){
+    document.getElementById('CityR').innerText = "City: "+ city;
+    document.getElementById('CityR').style.color = "green"
+    document.getElementById('cityError').innerText = " ";
+    return true;
+
+}
+else{
+    document.getElementById('CityR').innerText = "City: Missing";
+    document.getElementById('CityR').style.color = "red"
+    document.getElementById('cityError').innerText = "Missing";
+}
+ 
+}
+
+function validateState(){
+let state = document.getElementById('State').value; 
+if(state == " "){
+    document.getElementById('StateR').innerText = "State: Missing";
+    document.getElementById('StateR').style.color = "red"
+    document.getElementById('stateError').innerText = "Missing";
+}
+else{
+    document.getElementById('StateR').innerText = "State: "+ state;
+    document.getElementById('StateR').style.color = "green"
+    document.getElementById('stateError').innerText = " ";
+    return true;
+
+}  
+}
+
+function validateZip(){
+let zip = document.getElementById('Zip').value; 
+if(zip.length < 1){
+    document.getElementById('ZipR').innerText = "Zip: Missing";
+    document.getElementById('ZipR').style.color = "red"
+    document.getElementById('zipError').innerText = "Missing";
+}
+else if(zip.length < 5 || !/^\d+$/.test(zip)){
+    document.getElementById('ZipR').innerText = "Zip: Invalid";
+    document.getElementById('ZipR').style.color = "red"
+    document.getElementById('zipError').innerText = "Invalid";
+}
+else{
+    document.getElementById('ZipR').innerText = "Zip: "+ zip;
+    document.getElementById('ZipR').style.color = "green"
+    document.getElementById('zipError').innerText = " ";
+    return true;
+} 
+}
+
+ function verifySubmit(){
+
+  if (validateName('fname') && validateName('lname') && validateEmail() && validateUserID() && validatePassword() && validateAdd1() && validateCity() && validateDob() && validateMint() && validatePhone() && validateSSN() && validateState()) {
     document.getElementById('submitBtnContainer').style.display = "block";
   } 
   else {
   document.getElementById('submitBtnContainer').style.display = "none";
   }
 
- } 
-
-
-
+ }
 
 let ssnValidate = document.getElementById('ssn');
 
